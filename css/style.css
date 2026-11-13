@@ -109,3 +109,8 @@ nav{padding-left:max(clamp(18px,4vw,60px),env(safe-area-inset-left,0px));padding
 @media (max-height:520px){.ov{flex-flow:row wrap;justify-content:flex-start;align-content:center;gap:2vh 5vw}.ov a{font-size:min(13vh,10vw)}.hero{padding-top:14vh}.st,.ct,.pj{min-height:120svh}}
 /* موبايلات صغيرة (حتى 380px) */
 @media (max-width:380px){.pn{font-size:17vw}.logo svg{height:36px}}
+
+/* ===== NO-GL: لو الـ3D ما اشتغلش (جهاز ضعيف أو WebGL مقفول) بنعرض كرة CSS بديلة عشان الصفحة ما تبقاش فاضية ===== */
+.no-gl #gl{display:none}
+.no-gl::before{content:"";position:fixed;z-index:0;right:8vw;top:26vh;width:min(70vw,60vh);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffd09a,#ff7a1a 40%,#8a2d00 75%,#2a0c00);box-shadow:0 0 80px 20px rgba(255,122,26,.3);animation:orb 8s ease-in-out infinite alternate}
+@keyframes orb{to{transform:translate(-4vw,6vh) scale(1.06)}}

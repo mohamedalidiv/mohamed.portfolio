@@ -17,7 +17,9 @@ function engine(){
  const measure=()=>{const sk=document.getElementById('skills');if(sk){const r=sk.getBoundingClientRect();skY=r.top+scrollY+r.height/2}W=innerWidth;H=innerHeight;docH=document.documentElement.scrollHeight;mv.forEach(e=>{const r=e.getBoundingClientRect();e._y=r.top+scrollY+r.height/2});pj.forEach(e=>{const r=e.getBoundingClientRect();e._y=r.top+scrollY+r.height/2});layout()};
  const T=window.THREE;let R,S,C,rig,mat,heroP=[],workP=[];
  try{
-  R=new T.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio||1,innerWidth<760?1.5:2));   // الموبايل: جودة أقل شوية عشان الأداء
+  R=new T.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,alpha:true,powerPreference:'high-performance'});   // antialias شغّال دايمًا عشان حواف الكرة واللوحات ما تتسننش
+  R.domElement.addEventListener('webglcontextlost',ev=>{ev.preventDefault();document.body.classList.add('no-gl')});   // لو المتصفح قفل الـWebGL: كرة CSS بديلة
+  R.setPixelRatio(Math.min(devicePixelRatio||1,2));   // الموبايل: جودة أقل شوية عشان الأداء
   S=new T.Scene();S.fog=new T.FogExp2(0x050403,.05);C=new T.PerspectiveCamera(50,1,.1,120);
   // الكرة البرتقالي: shader (كود GPU). اللون في fragmentShader عند vec3(1.,.36,.04) = برتقالي، والتموّج في vertexShader
   mat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{t:{value:0},fade:{value:1}},
@@ -31,7 +33,7 @@ function engine(){
    vec3 col=vec3(.04,.008,0.)+vec3(1.,.36,.04)*(f*1.35+b*.55)+vec3(1.,.7,.35)*pow(f,5.)*.8;
    float hl=pow(max(dot(N,normalize(vec3(-.5,.6,.65))),0.),40.);col+=vec3(1.,.85,.65)*hl*.9;
    gl_FragColor=vec4(col,(.28+f*.72+b*.2)*fade);}`});
-  const ball=new T.Mesh(new T.SphereGeometry(1.6,innerWidth<760?48:72,innerWidth<760?48:72),mat);
+  const ball=new T.Mesh(new T.SphereGeometry(1.6,innerWidth<760?64:72,innerWidth<760?64:72),mat);
   const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d'),gg=gx.createRadialGradient(128,128,0,128,128,128);gg.addColorStop(0,'rgba(255,110,20,.55)');gg.addColorStop(.45,'rgba(255,90,10,.14)');gg.addColorStop(1,'rgba(255,90,10,0)');gx.fillStyle=gg;gx.fillRect(0,0,256,256);
   const glow=new T.Mesh(new T.PlaneGeometry(9,9),new T.MeshBasicMaterial({map:new T.CanvasTexture(gc),transparent:true,blending:T.AdditiveBlending,depthWrite:false,fog:false}));glow.position.z=-1.2;
   rig=new T.Group();rig.add(glow,ball);S.add(rig);rig.userData.g=glow;
@@ -45,19 +47,24 @@ function engine(){
     g.scale.set(w,w*.625,1);g.position.set([-1,0,1][i]*hw*(mob?.95:.66),-hh*(mob?.7:.64),CZ(0)-d);g.userData.b=g.position.clone();g.rotation.set(-.28,[.5,0,-.5][i],[.1,0,-.08][i])});
    workP.forEach((g,i)=>{const d=6.5,hh=t25*d,hw=hh*asp,w=Math.min(4.4,hw*(mob?1.25:.56)),pi=Math.min(1,Math.max(0,((pj[i]?pj[i]._y:0)-H/2)/Math.max(1,docH-H))),side=i%2?-1:1;
     g.scale.set(w,w*.625,1);g.position.set(mob?0:side*hw*.5,mob?-hh*.32:0,CZ(pi)-d);g.userData.b=g.position.clone();g.rotation.set(-.12,-side*.42,side*.05)})};
- }catch(e){R=null}
+ }catch(e){R=null;document.body.classList.add('no-gl')}
  measure();const onResize=()=>{if(Math.abs(innerWidth-W)<2&&Math.abs(innerHeight-H)<90)return;measure()};   // الموبايل: شريط العنوان بيطلع وينزل وقت السكرول، فمنعيدش بناء المشهد عشان ما يرمشش
  addEventListener('resize',onResize);addEventListener('load',measure);
  document.fonts&&document.fonts.ready.then(()=>{if(R)PROJECTS.forEach(p=>{paint(p);p.tex.needsUpdate=true});measure()});
  addEventListener('pointermove',e=>{mx=e.clientX/W-.5;my=e.clientY/H-.5},{passive:true});
- let t=0;
+ let t=0,q=3,fpsN=0,fpsT=0,last=performance.now();
+ const tau=matchMedia('(pointer:coarse)').matches?70:140;   // نعومة السكرول بالميلّي ثانية (أصغر = أسرع). بتعتمد على الزمن مش عدد الفريمات، فالمشهد ما يتأخرش عن السكرول حتى لو الجهاز بطيء
+ // مستوى الجودة التلقائي q: 3 = كامل (دقة الشاشة حتى 2، وبنبدأ بيه على كل الأجهزة) | 2 = دقة 1.5 | 1 = دقة 1 | 0 = أخف حاجة (من غير توهج ودقة منخفضة)
+ const applyQ=()=>{if(!R)return;R.setPixelRatio(q>=3?Math.min(devicePixelRatio||1,2):q===2?Math.min(devicePixelRatio||1,1.5):q===1?1:.65);R.setSize(W,H,false);if(rig&&rig.userData.g)rig.userData.g.visible=q>=1};
  // loop: بيشتغل كل فريم (60 مرة في الثانية): بيحرّك الكلام والكاميرا والكرة واللوحات حسب السكرول والماوس
  const loop=()=>{
-  const ty=scrollY;sy=reduce?ty:sy+(ty-sy)*.075;t+=reduce?0:.016;
+  const ty=scrollY;const now=performance.now(),dt=now-last;last=now;
+  if(R&&dt<250){fpsT+=dt;fpsN++;if(fpsN>=45){const avg=fpsT/fpsN;fpsN=0;fpsT=0;if(avg>26&&q>0){q--;applyQ()}}}   // لو الفريمات بطيئة (أقل من ~38 فريم/ث) الجودة بتقل لوحدها
+  sy=reduce?ty:sy+(ty-sy)*(1-Math.exp(-Math.min(dt,250)/tau));t+=reduce?0:.016;
   const pr=Math.min(1,Math.max(0,sy/Math.max(1,docH-H)));
   // k: في الموبايل الحركة الجانبية للكلام أقل (40%) عشان ما يطلعش برا الشاشة
   const k=W<760?.4:W<1100?.7:1;mv.forEach(e=>{let p=e.dataset.h?-sy/H:(e._y-sy-H/2)/H;if(!e.dataset.h){const ap=Math.abs(p);p=ap<.22?0:(ap-.22)*Math.sign(p)}   // منطقة الوسط (±22% من ارتفاع الشاشة): الكلام ثابت في مكانه ومقروء، وبيتحرك بس لما يقرّب من فوق أو تحت
-  if(e.dataset.end&&p<0)p=0;e.style.transform='translate3d('+(p*(+e.dataset.sp)*W*k)+'px,0,0)'});
+  if(e.dataset.end&&p<0)p=0;const tr='translate3d('+(Math.round(p*(+e.dataset.sp)*W*k*10)/10)+'px,0,0)';if(e._t!==tr){e._t=tr;e.style.transform=tr}});   // بنكتب الـstyle بس لو القيمة اتغيّرت (أخف على الموبايل)
   if(R){
    mx2+=(mx-mx2)*.05;my2+=(my-my2)*.05;
    const asp=W/H,mob=asp<1,vel=Math.max(-300,Math.min(300,ty-sy));
