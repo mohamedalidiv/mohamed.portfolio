@@ -1,0 +1,111 @@
+/* style.css — كل شكل الصفحة (ألوان، خطوط، أحجام، أماكن). مفيش فيه أي منطق حركة. */
+/* ===== الألوان والخطوط: غيّر من المتغيرات دي (--or هو البرتقالي) ===== */
+:root{--bg:#050403;--ink:#efe6da;--mute:#8d857a;--or:#ff7a1a;--line:rgba(239,230,218,.16);--serif:'Cormorant Garamond','Times New Roman',Georgia,serif;--sans:'Manrope','Segoe UI',Arial,sans-serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050403}}
+:root[data-theme="dark"]{--bg:#050403}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.7 var(--sans);overflow-x:hidden}
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#root{position:relative;z-index:1}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--or);outline-offset:4px}
+/* ===== NAV: الشريط العلوي (اللوجو + الإيميل + Menu) ===== */
+nav{position:fixed;top:0;inset-inline:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 20px) clamp(18px,4vw,60px) 0}
+.logo{display:flex;align-items:center}
+.logo svg{height:46px;width:auto;overflow:visible;display:block}
+.dot{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffd09a,var(--or) 55%,#b53c00);box-shadow:0 0 24px rgba(255,122,26,.7)}
+.right{display:flex;align-items:center;gap:22px;font-size:14px}
+.mail{display:flex;align-items:center;gap:8px}
+.mail::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--or)}
+.menu{background:none;border:0;border-inline-start:1px solid var(--line);padding:4px 0 4px 22px;color:var(--ink);font:300 30px var(--serif);cursor:pointer}
+/* ===== أيقونة زرار Menu (بتظهر في الموبايل بدل الكلمة) ===== */
+.mi{display:none;width:30px;height:16px;position:relative}
+.mi b{position:absolute;inset-inline-start:0;height:2px;border-radius:2px;background:var(--ink);transition:transform .35s,width .35s,top .35s}
+.mi b:nth-child(1){top:2px;width:30px}
+.mi b:nth-child(2){top:12px;width:20px;background:var(--or)}
+.menu.open .mi b:nth-child(1){top:7px;width:26px;transform:rotate(45deg)}
+.menu.open .mi b:nth-child(2){top:7px;width:26px;transform:rotate(-45deg)}
+/* ===== OVERLAY: قايمة Menu ملء الشاشة ===== */
+.ov{position:fixed;inset:0;z-index:15;background:rgba(5,4,3,.96);display:flex;flex-direction:column;justify-content:center;padding:0 clamp(24px,8vw,120px);gap:4px;opacity:0;pointer-events:none;transition:opacity .5s}
+.ov.on{opacity:1;pointer-events:auto}
+.ov a{font:300 clamp(48px,11vw,120px)/1.05 var(--serif);transition:color .3s,padding .3s}
+.ov a:hover{color:var(--or);padding-inline-start:20px}
+/* ===== MV: أي عنصر عليه الكلاس ده بيتحرك يمين/شمال مع السكرول ===== */
+.mv{will-change:transform;white-space:nowrap}
+/* ===== HERO: أول شاشة (creative web developer) ===== */
+.hero{position:relative;min-height:100svh;padding-top:13vh}
+.ht{margin:0;font:300 clamp(64px,min(17vw,24vh),320px)/.78 var(--serif);letter-spacing:-.035em;color:#eadfd1}
+.ht .mv{display:block;padding-bottom:.04em}
+.ht .mv:nth-child(2){margin-left:7vw}.ht .mv:nth-child(3){margin-left:1.5vw}
+.rise{display:inline-block;opacity:0;transform:translateY(60%);filter:blur(12px)}
+.ready .rise{animation:rise .55s cubic-bezier(.16,.8,.2,1) forwards}
+.ht .mv:nth-child(2) .rise{animation-delay:0s}.ht .mv:nth-child(3) .rise{animation-delay:0s}
+@keyframes rise{to{opacity:1;transform:none;filter:none}}
+.meta{position:absolute;inset-inline-end:clamp(18px,4vw,60px);top:22vh;font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+.meta i{display:block;width:64px;height:2px;background:var(--or);margin-bottom:26px}
+.meta p{margin:0 0 56px}.meta .sc{color:var(--mute);display:flex;flex-direction:column;gap:14px}
+.meta .sc b{display:block;width:1px;height:44px;background:var(--mute);position:relative;overflow:hidden}
+.meta .sc b::after{content:"";position:absolute;inset:0;background:var(--or);animation:drip 2s ease-in-out infinite}
+@keyframes drip{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+/* ===== STATEMENT: الجمل الكبيرة + نبذة عني ===== */
+.st{min-height:130svh;display:flex;flex-direction:column;justify-content:center;gap:.05em;padding:20vh 0}
+.big{font:300 clamp(54px,min(11.5vw,22vh),200px)/.95 var(--serif);letter-spacing:-.03em;margin:0}
+.big em{font-style:italic;color:var(--or)}
+.st .big{padding:0 clamp(18px,4vw,60px)}
+.note{max-width:30em;margin:7vh 0 0 auto;padding:0 clamp(18px,4vw,60px);color:var(--mute);font-size:17px}
+.lab{padding:0 clamp(18px,4vw,60px);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute)}
+/* ===== WORK: كل مشروع (الاسم الكبير + الوصف) ===== */
+.pj{min-height:110svh;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(18px,4vw,60px)}
+.pn{margin:0;font:300 clamp(80px,min(19vw,36vh),340px)/.9 var(--serif);letter-spacing:-.04em;font-style:italic}
+.pm{margin-top:3vh;display:flex;gap:18px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:14px}
+.pm b{font:500 22px var(--serif);color:var(--ink)}
+.go{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink);transition:background .3s,border-color .3s}
+.go:hover{background:var(--or);border-color:var(--or);color:#000}
+.pj.r{align-items:flex-end;text-align:right}.pj.r .pm{justify-content:flex-end}
+/* ===== SKILLS: المهارات (صفوف كبيرة بتتحرك مع السكرول) ===== */
+.sk{padding:16vh 0 12vh;display:flex;flex-direction:column;gap:5vh}
+.sk .big{padding:0 clamp(18px,4vw,60px);margin-bottom:2vh;font-size:clamp(38px,min(7vw,14vh),120px)}
+.sg{margin:2vh 0 0;padding:0 clamp(18px,4vw,60px);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute)}
+.sr{display:flex;flex-wrap:wrap;align-items:center;white-space:normal;padding:0 clamp(18px,4vw,60px);font:300 clamp(26px,min(4vw,8.5vh),64px)/1.15 var(--serif);letter-spacing:-.02em}
+.sk > div:nth-child(3) .sr{font-style:italic}
+.sr i{display:inline-block;width:.16em;height:.16em;border-radius:50%;background:var(--or);margin:0 .38em;vertical-align:middle;box-shadow:0 0 14px rgba(255,122,26,.7)}
+/* ===== CONTACT: قسم التواصل في الآخر ===== */
+.ct{min-height:110svh;display:flex;flex-direction:column;justify-content:center;gap:5vh;padding:0 clamp(18px,4vw,60px)}
+.ct a.m{font:300 clamp(24px,5vw,68px)/1.1 var(--serif);border-bottom:1px solid var(--or);align-self:flex-start;padding-bottom:6px;transition:color .3s}
+.ct a.m:hover{color:var(--or)}
+.ft{display:flex;gap:28px;flex-wrap:wrap;color:var(--mute);font-size:14px}
+.ft a:hover{color:var(--or)}
+/* ===== MOBILE: تعديلات الموبايل ===== */
+@media (max-width:760px){.meta{display:none}.mail{display:none}.menu{border:0;padding:8px 0 8px 8px}.menu .mt{display:none}.menu .mi{display:block}.sr{font-size:6.5vw;line-height:1.2;white-space:normal!important;transform:none!important}.pn{font-size:20vw}.big{font-size:9vw;line-height:1.05}.note{margin-top:5vh;font-size:16px}.logo svg{height:40px}}
+/* ===== INTRO: شاشة الدخول. الخلفية شفافة عشان الكرة تبان وهي بتكبر مع العدّاد.
+   عند 100% كل حاجة بتظهر فجأة والعدّاد بيختفي ===== */
+body.loading{overflow:hidden;height:100svh}
+.intro{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s ease}
+.intro.out{opacity:0}
+.it,.ir{position:absolute;margin:0;top:calc(env(safe-area-inset-top,0px) + 26px);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute)}
+.it{left:clamp(18px,4vw,60px)}.ir{right:clamp(18px,4vw,60px)}
+.il{position:absolute;left:clamp(18px,4vw,60px);right:clamp(18px,4vw,60px);top:calc(env(safe-area-inset-top,0px) + 62px);height:2px;background:var(--or);transform-origin:left;box-shadow:0 0 14px rgba(255,122,26,.8)}
+.ic{position:absolute;left:clamp(18px,4vw,60px);bottom:calc(env(safe-area-inset-bottom,0px) + 8vh);font:300 clamp(110px,30vw,360px)/.8 var(--serif);letter-spacing:-.04em;color:var(--ink)}
+.ic small{font-size:.2em;color:var(--or);margin-inline-start:.1em;letter-spacing:0}
+/* بعد ما الموقع يفتح (body.ready): الشريط العلوي وسطر الهيرو الجانبي بيظهروا مع باقي الصفحة */
+nav,.meta{opacity:0;transform:translateY(-12px);transition:opacity .35s ease,transform .35s ease}
+.meta{transform:translateX(14px)}
+.ready nav,.ready .meta{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rise,.ready .rise{animation:none;opacity:1;transform:none;filter:none}nav,.meta{opacity:1;transform:none;transition:none}.intro::after{animation:none}.meta .sc b::after{animation:none}}
+
+/* ===== RESPONSIVE: تعديلات لكل الأجهزة (موبايل صغير، تابلت، لاندسكيب، شاشات كبيرة، الشاشات اللي فيها notch) ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}   /* iOS ما يكبّرش الخط لوحده في الوضع الأفقي */
+body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}   /* الـnotch في الوضع الأفقي */
+nav{padding-left:max(clamp(18px,4vw,60px),env(safe-area-inset-left,0px));padding-right:max(clamp(18px,4vw,60px),env(safe-area-inset-right,0px))}
+/* شاشات كبيرة (1800px وأكتر): خطوط أكبر */
+@media (min-width:1800px){body{font-size:19px}.ht{font-size:clamp(64px,min(17vw,24vh),420px)}.big{font-size:clamp(54px,min(11.5vw,22vh),260px)}.pn{font-size:clamp(80px,min(19vw,36vh),440px)}.sr{font-size:clamp(26px,min(4vw,8.5vh),84px)}}
+/* تابلت (حتى 1024px): بنخفي سطر الاسم الجانبي عشان ما يتداخلش مع الكرة */
+@media (max-width:1024px){.meta{display:none}.mail{font-size:13px}}
+/* شاشة واقفة (موبايل وتابلت): كلام الهيرو أكبر عشان يملّا الشاشة الطويلة */
+@media (orientation:portrait){.ht{font-size:clamp(64px,min(21vw,22vh),320px)}}
+/* موبايل لاندسكيب (الارتفاع قليل): قايمة Menu صفوف جنب بعض عشان تتحشر في الشاشة */
+@media (max-height:520px){.ov{flex-flow:row wrap;justify-content:flex-start;align-content:center;gap:2vh 5vw}.ov a{font-size:min(13vh,10vw)}.hero{padding-top:14vh}.st,.ct,.pj{min-height:120svh}}
+/* موبايلات صغيرة (حتى 380px) */
+@media (max-width:380px){.pn{font-size:17vw}.logo svg{height:36px}}
