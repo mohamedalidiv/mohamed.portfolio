@@ -14,7 +14,7 @@ function engine(){
  // Z = المسافة اللي الكاميرا بتقطعها على طول الصفحة (أكبر = طيران أسرع). CZ = مكان الكاميرا حسب السكرول
   const Z=44,CZ=p=>9-p*Z,sm=(a,b,v)=>{v=Math.min(1,Math.max(0,(v-a)/(b-a)));return v*v*(3-2*v)};
  let skY=-1e9;   // مكان قسم Skills في الصفحة (عشان نقلّل ظهور الكرة وراه)
- const measure=()=>{const sk=document.getElementById('skills');if(sk){const r=sk.getBoundingClientRect();skY=r.top+scrollY+r.height/2}W=innerWidth;H=innerHeight;docH=document.documentElement.scrollHeight;mv.forEach(e=>{const r=e.getBoundingClientRect();e._y=r.top+scrollY+r.height/2});pj.forEach(e=>{const r=e.getBoundingClientRect();e._y=r.top+scrollY+r.height/2});layout()};
+ const measure=()=>{const sk=document.getElementById('skills');if(sk){const r=sk.getBoundingClientRect();skY=r.top+scrollY+r.height/2}W=innerWidth;H=innerHeight;docH=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);mv.forEach(e=>{const r=e.getBoundingClientRect();e._y=r.top+scrollY+r.height/2});pj.forEach(e=>{const r=e.getBoundingClientRect();e._y=r.top+scrollY+r.height/2});layout()};
  const T=window.THREE;let R,S,C,rig,mat,heroP=[],workP=[];
  try{
   R=new T.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,alpha:true,powerPreference:'high-performance'});   // antialias شغّال دايمًا عشان حواف الكرة واللوحات ما تتسننش
@@ -52,7 +52,7 @@ function engine(){
  addEventListener('resize',onResize);addEventListener('load',measure);
  document.fonts&&document.fonts.ready.then(()=>{if(R)PROJECTS.forEach(p=>{paint(p);p.tex.needsUpdate=true});measure()});
  addEventListener('pointermove',e=>{mx=e.clientX/W-.5;my=e.clientY/H-.5},{passive:true});
- let t=0,q=3,fpsN=0,fpsT=0,last=performance.now();
+ let t=0,q=3,fpsN=0,fpsT=0,chk=0,last=performance.now();
  const tau=matchMedia('(pointer:coarse)').matches?70:140;   // نعومة السكرول بالميلّي ثانية (أصغر = أسرع). بتعتمد على الزمن مش عدد الفريمات، فالمشهد ما يتأخرش عن السكرول حتى لو الجهاز بطيء
  // مستوى الجودة التلقائي q: 3 = كامل (دقة الشاشة حتى 2، وبنبدأ بيه على كل الأجهزة) | 2 = دقة 1.5 | 1 = دقة 1 | 0 = أخف حاجة (من غير توهج ودقة منخفضة)
  const applyQ=()=>{if(!R)return;R.setPixelRatio(q>=3?Math.min(devicePixelRatio||1,2):q===2?Math.min(devicePixelRatio||1,1.5):q===1?1:.65);R.setSize(W,H,false);if(rig&&rig.userData.g)rig.userData.g.visible=q>=1};
@@ -61,6 +61,7 @@ function engine(){
   const ty=scrollY;const now=performance.now(),dt=now-last;last=now;
   if(R&&dt<250){fpsT+=dt;fpsN++;if(fpsN>=45){const avg=fpsT/fpsN;fpsN=0;fpsT=0;if(avg>26&&q>0){q--;applyQ()}}}   // لو الفريمات بطيئة (أقل من ~38 فريم/ث) الجودة بتقل لوحدها
   sy=reduce?ty:sy+(ty-sy)*(1-Math.exp(-Math.min(dt,250)/tau));t+=reduce?0:.016;
+  if(++chk>(t<8?2:30)){chk=0;const sh=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);if(Math.abs(sh-docH)>2)measure()}   // لو طول الصفحة اتغيّر (الخطوط، خلص الـintro، شريط المتصفح) بنعيد القياس
   const pr=Math.min(1,Math.max(0,sy/Math.max(1,docH-H)));
   // k: في الموبايل الحركة الجانبية للكلام أقل (40%) عشان ما يطلعش برا الشاشة
   const k=W<760?.4:W<1100?.7:1;mv.forEach(e=>{let p=e.dataset.h?-sy/H:(e._y-sy-H/2)/H;if(!e.dataset.h){const ap=Math.abs(p);p=ap<.22?0:(ap-.22)*Math.sign(p)}   // منطقة الوسط (±22% من ارتفاع الشاشة): الكلام ثابت في مكانه ومقروء، وبيتحرك بس لما يقرّب من فوق أو تحت
